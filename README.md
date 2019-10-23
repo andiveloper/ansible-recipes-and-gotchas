@@ -3,6 +3,9 @@
 ## Process will be terminated with RECEIVED SIGNAL 1: SIGHUP after playbook finishes
 While creating a role for Hadoop deployment I discovered that the NameNode process always shut down after the playbook finished with the message `ERROR org.apache.hadoop.hdfs.server.namenode.NameNode: RECEIVED SIGNAL 1: SIGHUP`. The reason for this is that the NameNode process registered a UNIX signal handler for HUP (HangUp) which is send to the process as soon as the ssh connection create by ansible is closed. To avoid this signal to be sent `nohup` can be used in front of any command. In the case of the Hadoop NameNode I've ended up using the following command to start it: `nohup hdfs --daemon start namenode`
 
+## `tags` inheritance
+`tags` are not inherited when using `include_tasks`. This means that if the tasks within the imported file are not tagged with the same tags as the `include_tasks` instruction none of the tasks will be executed when running a playbook using `--tags`. Instead `tags` are only inherited to child tasks when using `import_tasks`. See also static vs. dynamic imports in the Ansible documentation.
+
 ## Creating a numbered, comma seperated string from a list of hosts
 
 ```
