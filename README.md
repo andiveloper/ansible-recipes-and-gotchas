@@ -1,5 +1,23 @@
 # Ansible recipes and gotchas
 
+## Running `ansible-playbook` fails with `ERROR! Unexpected Exception, this is probably a bug: setuptools>=11.3`
+
+```
+# ansible-playbook 
+ERROR! Unexpected Exception, this is probably a bug: setuptools>=11.3
+the full traceback was:
+
+Traceback (most recent call last):
+  File "/usr/bin/ansible-playbook", line 92, in <module>
+    mycli = getattr(__import__("ansible.cli.%s" % sub, fromlist=[myclass]), myclass)
+  [...]
+  File "/usr/lib/python2.7/site-packages/pkg_resources.py", line 626, in resolve
+    raise DistributionNotFound(req)
+DistributionNotFound: setuptools>=11.3
+```
+
+To resolve this issue `python-dev` has to be installed, e.g. on RHEL: `yum install python-devel` 
+
 ## Process will be terminated with RECEIVED SIGNAL 1: SIGHUP after playbook finishes
 While creating a role for Hadoop deployment I discovered that the NameNode process always shut down after the playbook finished with the message `ERROR org.apache.hadoop.hdfs.server.namenode.NameNode: RECEIVED SIGNAL 1: SIGHUP`. The reason for this is that the NameNode process registered a UNIX signal handler for HUP (HangUp) which is send to the process as soon as the ssh connection create by ansible is closed. To avoid this signal to be sent `nohup` can be used in front of any command. In the case of the Hadoop NameNode I've ended up using the following command to start it: `nohup hdfs --daemon start namenode`
 
